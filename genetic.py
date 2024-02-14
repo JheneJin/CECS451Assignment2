@@ -5,7 +5,6 @@ import numpy as np
 # def state(board):
 #     stateDic = {}
 #     stringState = ""
-#     stateFitness = board.get_fitness()
 #     for i in range(board.n_queen):
 #         for j in range(board.n_queen):
 #             if board.map[i][j] == 1:
