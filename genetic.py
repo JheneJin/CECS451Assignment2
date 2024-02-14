@@ -14,7 +14,6 @@ import numpy as np
 
 def population():
     stateList = []
-    # stateFitness = board.get_fitness()
     for _ in range(8):
         stringState = "".join(str(random.randint(0, 4)) for _ in range(5))
         stateList.append(stringState)
