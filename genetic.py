@@ -94,7 +94,10 @@ def geneticAlgo(board, generations):
         sortedValues = {k: v for k, v in sorted(fitnessValues.items(), key=lambda item: item[1])}
         bestState =  list(sortedValues.keys())[0]
         bestFitness = sortedValues[bestState]
-        return bestState, bestFitness
+
+        if bestFitness == 0:
+            return bestState, bestFitness
+        # return bestState, bestFitness
     
 test = Board(5)
 optimalState, fitness = (geneticAlgo(test, 100000))
