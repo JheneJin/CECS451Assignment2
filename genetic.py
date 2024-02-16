@@ -2,6 +2,7 @@ from board import Board
 import random
 import time
 
+#creates an array of 8 random states
 def population():
     stateList = []
     #do it 8 times
@@ -12,6 +13,49 @@ def population():
         stateList.append(stringState)
     return stateList
 
+#based on the state string generates a board with the respective queen layout
+def generateBoard(board, stateStr):
+    rowIndex = 0
+    #creates empty board
+    stateBoard = emptyBoard(board)
+    for i in stateStr:
+        #gets a part of the string
+        valueIndex = int(i)
+        #change the empty spot to queen based on state string
+        stateBoard.map[rowIndex][valueIndex] = 1   
+        #increases to next row after every iteration
+        rowIndex += 1
+    return stateBoard
+
+#creates empty board, helper function for generate board
+def emptyBoard(board):
+    #creates a copy of the generated board
+    tempBoard = board
+    for i in range(board.n_queen):
+        for j in range(board.n_queen):
+            #changes the queen to a 0
+            if tempBoard.map[i][j] == 1:
+                tempBoard.map[i][j] = 0
+    #returns an empty board
+    return tempBoard
+
+
+# create boards based off the string state then extract fitness 
+def getStateFitness(board, stateStr):
+    stateBoard = generateBoard(board, stateStr)
+    fitness = stateBoard.get_fitness()
+    return fitness
+
+#make a dictionary of states and their fitness value
+def fitnessDic(board, population):
+    fitnessDic = {}
+    for i in population:
+        fitness = getStateFitness(board, i)
+        fitnessDic[i] = fitness
+    return fitnessDic
+
+# generate empty ,matrixc of "-" and then by using stateStr with the best fitness, place queens in the best spot 
+# then print out ever row in the format of matrix 
 def formatBoard(board, stateStr):
     format = [["-"] * board.n_queen for i in range(board.n_queen)]
     rowIndex = 0
@@ -26,43 +70,6 @@ def formatBoard(board, stateStr):
     # Print the matrix
     for row in format:
         print(" ".join(row))
-        
-def generateBoard(board, stateStr):
-    rowIndex = 0
-    #creates empty board
-    stateBoard = emptyBoard(board)
-    for i in stateStr:
-        #gets a part of the string
-        valueIndex = int(i)
-        #change the empty spot to queen based on state string
-        stateBoard.map[rowIndex][valueIndex] = 1   
-        #increases to next row after every iteration
-        rowIndex += 1
-    return stateBoard
-
-# create boards based off the string state then find fitness and append to dic based on state
-def getStateFitness(board, stateStr):
-    stateBoard = generateBoard(board, stateStr)
-    fitness = stateBoard.get_fitness()
-    return fitness
-
-def fitnessDic(board, population):
-    fitnessDic = {}
-    for i in population:
-        fitness = getStateFitness(board, i)
-        fitnessDic[i] = fitness
-    return fitnessDic
-
-def emptyBoard(board):
-    #creates a copy of the generated board
-    tempBoard = board
-    for i in range(board.n_queen):
-        for j in range(board.n_queen):
-            #changes the queen to a 0
-            if tempBoard.map[i][j] == 1:
-                tempBoard.map[i][j] = 0
-    #returns an empty board
-    return tempBoard
 
 def selection(population):
     #extracts two items from population arr randomly
@@ -105,40 +112,50 @@ def mutation(children, mutationRate):
     #returns tuple
     return child1, child2
 
-def geneticAlgo(board, generations):
+def geneticAlgo(board):
     startTime = time.time()
+    #populate the parent
     parentGeneration = population()
     counter = 0
-    for generation in range(generations):
+    while True:
+        #create an array to hold a children, resets everytime it goes back to the loop
         newGeneration = []
-        counter += 1
 
+        #runs at the length of half the states
         for _ in range(len(parentGeneration) // 2):
+            #select two random parents
             selected = selection(parentGeneration)
+            #create a tuple of two children that are crossed
             crossed = crossover(selected)
+            #mutate the two children tuple 
             mutated = mutation(crossed, .50)
+            #extract from the tuple
             child1, child2 = mutated
+            #append both kids to the array
             newGeneration.append(child1)
             newGeneration.append(child2)
         
+        #call fitnnessDic function to append new Generation states with their respected fitness
         fitnessValues = fitnessDic(board, newGeneration)
-        sortedValues = {k: v for k, v in sorted(fitnessValues.items(), key=lambda item: item[1])}
+        # sort the values within the dictionary from smallest to highest
+        sortedValues = {state: value for state, value in sorted(fitnessValues.items(), key=lambda state: state[1])}
+        #create an array of keys from sortedValues, then extract the first item
         bestState =  list(sortedValues.keys())[0]
+        #use the first key to extract its respected firness from sortedValues dic
         bestFitness = sortedValues[bestState]
 
+        #when best fitness equals 0 return best state and run time
         if bestFitness == 0:
             endTime = time.time()
             runTime = endTime - startTime
             ms = round(runTime * 1000)
-            formatMs = ms
-            return bestState, formatMs
-        # return bestState, bestFitness
+            return bestState, str(ms)
+        #repopulates the parent gen with the new gen, so that we can create a diverse incestual family tree
         for i in range(len(newGeneration)):
             parentGeneration[i] = newGeneration[i]
     
 test = Board(5)
-# optimalState, fitness, generation = (geneticAlgo(test, 100000))
-optimalState, ms = (geneticAlgo(test, 100000))
-
-print(ms, "ms")
+optimalState, timed = (geneticAlgo(test))
+# print(getStateFitness(test, optimalState))
+print("Running time:", timed + "ms")
 formatBoard(test, optimalState)
