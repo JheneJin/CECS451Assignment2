@@ -1,5 +1,6 @@
 from board import Board
 import random
+import time
 
 def population():
     stateList = []
@@ -90,14 +91,15 @@ def mutation(children, mutationRate):
     return child1, child2
 
 def geneticAlgo(board, generations):
-    arr = population()
+    startTime = time.time()
+    parentGeneration = population()
     counter = 0
     for generation in range(generations):
         newGeneration = []
         counter += 1
 
-        for _ in range(len(arr) // 2):
-            selected = selection(arr)
+        for _ in range(len(parentGeneration) // 2):
+            selected = selection(parentGeneration)
             crossed = crossover(selected)
             mutated = mutation(crossed, .50)
             child1, child2 = mutated
@@ -110,17 +112,31 @@ def geneticAlgo(board, generations):
         bestFitness = sortedValues[bestState]
 
         if bestFitness == 0:
-            return bestState, bestFitness, counter
+            endTime = time.time()
+            runTime = endTime - startTime
+            ms = round(runTime * 1000)
+            formatMs = ms
+            return bestState, formatMs
         # return bestState, bestFitness
+        for i in range(len(newGeneration)):
+            parentGeneration[i] = newGeneration[i]
     
 test = Board(5)
 # optimalState, fitness, generation = (geneticAlgo(test, 100000))
-# for _ in range(50):
-optimalState, fitness, generation = (geneticAlgo(test, 100000))
-    # print(optimalState, fitness, generation)
-bestBoard = (generateBoard(test, optimalState))
-for row in bestBoard.get_map():
+optimalState, ms = (geneticAlgo(test, 100000))
+
+print(ms)
+output = generateBoard(test, optimalState)
+for row in output.get_map():
     print(row)
+
+# for i in range(test.n_queen):
+#     for j in range(test.n_queen):
+#         if output.map[i][j] == 1:
+#             print(output.map[i][j])
+#         else:
+#             print("-")
+
 
 
 
