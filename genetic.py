@@ -12,6 +12,21 @@ def population():
         stateList.append(stringState)
     return stateList
 
+def formatBoard(board, stateStr):
+    format = [["-"] * board.n_queen for i in range(board.n_queen)]
+    rowIndex = 0
+    for i in stateStr:
+        #gets a part of the string
+        valueIndex = int(i)
+        #change the empty spot to queen based on state string
+        format[rowIndex][valueIndex] = "1"   
+        #increases to next row after every iteration
+        rowIndex += 1
+
+    # Print the matrix
+    for row in format:
+        print(" ".join(row))
+        
 def generateBoard(board, stateStr):
     rowIndex = 0
     #creates empty board
@@ -125,18 +140,5 @@ test = Board(5)
 # optimalState, fitness, generation = (geneticAlgo(test, 100000))
 optimalState, ms = (geneticAlgo(test, 100000))
 
-print(ms)
-output = generateBoard(test, optimalState)
-for row in output.get_map():
-    print(row)
-
-# for i in range(test.n_queen):
-#     for j in range(test.n_queen):
-#         if output.map[i][j] == 1:
-#             print(output.map[i][j])
-#         else:
-#             print("-")
-
-
-
-
+print(ms, "ms")
+formatBoard(test, optimalState)
